@@ -8,15 +8,7 @@ import java.io.PrintWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -432,19 +424,21 @@ public class JmxCollector extends Collector implements Collector.Describable {
                 ((start - createTimeNanoSecs) / 1000000000L < config.startDelaySeconds)) {
             throw new IllegalStateException("JMXCollector waiting for startDelaySeconds");
         }
+        List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+        mfsList.addAll(receiver.metricFamilySamplesMap.values());
+        List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
+        ArrayList<String> labelNames = new ArrayList<String>();
+        ArrayList<String> labelVals = new ArrayList<String>();
         try {
             scraper.doScrape();
+            samples.add(new MetricFamilySamples.Sample(
+                    "remote_up", Arrays.asList("app_name"), Arrays.asList(this.config.instanceName), 1));
         } catch (Exception e) {
             error = 1;
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             LOGGER.severe("JMX scrape failed: " + sw.toString());
         }
-        List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-        mfsList.addAll(receiver.metricFamilySamplesMap.values());
-        List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
-        ArrayList<String> labelNames = new ArrayList<String>();
-        ArrayList<String> labelVals = new ArrayList<String>();
         if (config.instanceName != "") {
             labelNames.add("instance_name");
             labelVals.add(config.instanceName);

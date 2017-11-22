@@ -431,6 +431,7 @@ public class JmxCollector extends Collector implements Collector.Describable {
         ArrayList<String> labelVals = new ArrayList<String>();
         try {
             scraper.doScrape();
+            mfsList.addAll(receiver.metricFamilySamplesMap.values());
             samples.add(new MetricFamilySamples.Sample(
                     "remote_up", Arrays.asList("app_name"), Arrays.asList(this.config.instanceName), 1));
         } catch (Exception e) {
